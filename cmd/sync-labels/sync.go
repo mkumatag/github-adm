@@ -2,7 +2,7 @@ package sync_labels
 
 import (
 	"encoding/json"
-	"github.com/google/go-github/v32/github"
+	"github.com/google/go-github/v33/github"
 	"github.com/mkumatag/github-adm/pkg"
 	"github.com/mkumatag/github-adm/pkg/client"
 	"github.com/spf13/cobra"
