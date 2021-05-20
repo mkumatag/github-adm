@@ -1,0 +1,140 @@
+name: Upload Release Asset
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+env:
+  GO_VERSION: "1.15"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Get the target release version
+      id: get_version
+      run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
+
+    - name: Set up Go ${{ env.GO_VERSION }}
+      uses: actions/setup-go@v2
+      with:
+        go-version: ^${{ env.GO_VERSION }}
+      id: go
+
+    - name: Check out code into the Go module directory
+      uses: actions/checkout@v2
+
+    - name: Build
+      run: |
+        mkdir -p bin
+        VERSION=${{ steps.get_version.outputs.VERSION }}
+        STATIC_FLAG='-w -extldflags "-static"'
+        for platform in darwin/amd64 linux/amd64 linux/ppc64le windows/amd64
+        do
+          os_name=$(echo "$platform" | cut -d "/" -f 1)
+          arch=$(echo "$platform" | cut -d "/" -f 2)
+          CGO_ENABLED=0 GOOS=${os_name} GOARCH=${arch} go build -a -tags netgo -ldflags "${STATIC_FLAG}" -o bin/${os_name}-${arch}/github-adm .
+          tar -czvf github-adm-${os_name}-${arch}.tar.gz -C bin/${os_name}-${arch} github-adm
+        done
+        tar -czvf github-adm-binaries.tar.gz bin/
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ steps.get_version.outputs.VERSION }}
+        draft: true
+        prerelease: true
+
+    - name: Upload linux - amd64
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./bin/linux-amd64/github-adm
+        asset_name: github-adm-linux-amd64
+        asset_content_type: application/octet-stream
+
+    - name: Upload linux - amd64 - tar.gz
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: github-adm-linux-amd64.tar.gz
+        asset_name: github-adm-linux-amd64.tar.gz
+        asset_content_type: application/tar+gzip
+
+    - name: Upload linux - ppc64le
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./bin/linux-ppc64le/github-adm
+        asset_name: github-adm-linux-ppc64le
+        asset_content_type: application/octet-stream
+
+    - name: Upload linux - ppc64le - tar.gz
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: github-adm-linux-ppc64le.tar.gz
+        asset_name: github-adm-linux-ppc64le.tar.gz
+        asset_content_type: application/tar+gzip
+
+    - name: Upload macos
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./bin/darwin-amd64/github-adm
+        asset_name: github-adm-darwin-amd64
+        asset_content_type: application/octet-stream
+
+    - name: Upload macos - tar.gz
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: github-adm-darwin-amd64.tar.gz
+        asset_name: github-adm-darwin-amd64.tar.gz
+        asset_content_type: application/tar+gzip
+
+    - name: Upload Windows - amd64
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./bin/windows-amd64/github-adm
+        asset_name: github-adm-windows-amd64
+        asset_content_type: application/octet-stream
+
+    - name: Upload Windows - amd64 - tar.gz
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: github-adm-windows-amd64.tar.gz
+        asset_name: github-adm-windows-amd64.tar.gz
+        asset_content_type: application/tar+gzip
+
+    - name: Upload all
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: github-adm-binaries.tar.gz
+        asset_name: github-adm-binaries.tar.gz
+        asset_content_type: application/tar+gzip
