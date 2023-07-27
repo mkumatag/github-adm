@@ -8,6 +8,7 @@ import (
 	"github.com/spf13/cobra"
 	"io/ioutil"
 	"k8s.io/klog/v2"
+	"net/url"
 	"sync"
 )
 
@@ -85,9 +86,10 @@ examples:
 					go func(wg *sync.WaitGroup, label string) {
 						defer wg.Done()
 						klog.Infof("deleting label: %s", label)
-						resp, err := gh.DeleteLabel(opt.Org, opt.Repo, label)
+						resp, err := gh.DeleteLabel(opt.Org, opt.Repo, url.QueryEscape(label))
 						if err != nil {
 							klog.Errorf("failed to delete label: %s, err: %v", label, err)
+                                                        return
 						}
 						klog.Infof("deleted label: %s, %v %v", label, resp.StatusCode, resp.Body)
 					}(&wg, *repoLabels[i].Name)
