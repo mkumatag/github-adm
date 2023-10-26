@@ -90,4 +90,3 @@ This project is licensed under the Apache-2.0 License - see the [LICENSE](LICENS
 If you have any questions or need assistance, feel free to contact us at [manjunath.cse@gmail.com](mailto:manjunath.cse@gmail.com).
 
 Happy labeling with github-adm!
-```
