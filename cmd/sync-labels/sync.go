@@ -86,7 +86,7 @@ examples:
 					go func(wg *sync.WaitGroup, label string) {
 						defer wg.Done()
 						klog.Infof("deleting label: %s", label)
-						resp, err := gh.DeleteLabel(opt.Org, opt.Repo, url.QueryEscape(label))
+						resp, err := gh.DeleteLabel(opt.Org, opt.Repo, url.PathEscape(label))
 						if err != nil {
 							klog.Errorf("failed to delete label: %s, err: %v", label, err)
                                                         return
