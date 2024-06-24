@@ -7,5 +7,5 @@ require (
 	github.com/spf13/cobra v1.8.1
 	golang.org/x/crypto v0.21.0 // indirect
 	golang.org/x/oauth2 v0.21.0
-	k8s.io/klog/v2 v2.130.0
+	k8s.io/klog/v2 v2.130.1
 )
